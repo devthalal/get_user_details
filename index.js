@@ -1,17 +1,31 @@
-
+import { shared } from "node-blox-sdk";
+import { getBody } from "./utils.js";
 
 const get_user_details = async (req, res) => {
-
   // health check
   if (req.params["health"] === "health") {
-    res.write(JSON.stringify({success: true, msg: "Health check success"}))
-    res.end()
+    res.write(JSON.stringify({ success: true, msg: "Health check success" }));
+    res.end();
   }
 
-  // Add your code here
-  res.write(JSON.stringify({success: true, msg: `Hello get_user_details`}))
-  res.end()
-  
-}
+  // Getting shared prisma client
+  const { prisma } = await shared.getShared();
 
-export default get_user_details
+  const { system_user_id } = await getBody(req);
+  const userData = await prisma.user.findUnique({
+    where: {
+      system_user_id,
+    },
+  });
+
+  res.write(
+    JSON.stringify({
+      success: true,
+      msg: `User retrieved succesfully`,
+      data: userData,
+    })
+  );
+  res.end();
+};
+
+export default get_user_details;
